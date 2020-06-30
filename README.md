@@ -37,7 +37,7 @@ Create migration for "product" table using laravel 7 php artisan command.
 
 > php artisan make:migration create_products_table --create=products
 
-<?php
+><?php
  
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
