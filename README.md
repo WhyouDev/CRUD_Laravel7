@@ -2,7 +2,9 @@
 
 
 
-<p align="center"><img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400"></p>
+<p align="center">
+<img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400">
+</p>
 
 <p align="center">
 <a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
@@ -11,72 +13,176 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
 </p>
 
-## About Laravel
+## Step 1 Install Laravel 7
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+composer create-project --prefer-dist laravel/laravel (your project name)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Step 2: Database Configuration
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+-setup your database, if you don't have .env file you can simply added with copy default .env_example
+ ex: cp .env_example .env 
 
-## Learning Laravel
+-then setting your database in your .env file
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=here your database name(your DB name)
+DB_USERNAME=<i>Your DB Username</i>
+DB_PASSWORD=<i>Your DB password</i>
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Step 3: Create Migration 
 
-## Laravel Sponsors
+Create migration for "product" table using laravel 7 php artisan command.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+> php artisan make:migration create_products_table --create=products
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-- [We Are The Robots Inc.](https://watr.mx/)
-- [Understand.io](https://www.understand.io/)
-- [Abdel Elrafa](https://abdelelrafa.com)
-- [Hyper Host](https://hyper.host)
-- [Appoly](https://www.appoly.co.uk)
-- [OP.GG](https://op.gg)
-- [云软科技](http://www.yunruan.ltd/)
+<?php
+ 
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+  
+class CreateProductsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->text('detail');
+            $table->timestamps();
+        });
+    }
+  
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('products');
+    }
+}
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+>run this = php artisan migrate 
 
-## Code of Conduct
+## Step 4: Add Resource Route
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+>routes/web.php 
 
-## Security Vulnerabilities
+Route::resource('products','ProductController');
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Step 5: Add Controller and Model
+
+Command for add controller
+>php artisan make:controller ProductController --resource --model=Product
+
+will create 7 methods :
+1)index()
+2)create()
+3)store()
+4)show()
+5)edit()
+6)update()
+7)destroy()
+
+app/Http/Controllers/ProductController.php
+
+## for index()
+
+    public function index()
+    {
+        $products = Product::latest()->paginate(5);
+  
+        return view('products.index',compact('products'))
+            ->with('i', (request()->input('page', 1) - 1) * 5);
+    }
+
+## for create()
+public function create()
+    {
+        return view('products.create');
+    }
+
+## for store()
+ public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'detail' => 'required',
+        ]);
+  
+        Product::create($request->all());
+   
+        return redirect()->route('products.index')
+                        ->with('success','Product created successfully.');
+    }
+
+## for show()
+public function show(Product $product)
+    {
+        return view('products.show',compact('product'));
+    }
+
+## for edit()
+public function edit(Product $product)
+    {
+        return view('products.edit',compact('product'));
+    } 
+
+## for update()
+ public function update(Request $request, Product $product)
+    {
+        $request->validate([
+            'name' => 'required',
+            'detail' => 'required',
+        ]);
+  
+        $product->update($request->all());
+  
+        return redirect()->route('products.index')
+                        ->with('success','Product updated successfully');
+    }   
+
+## for destroy()
+    public function destroy(Product $product)
+    {
+        $product->delete();
+  
+        return redirect()->route('products.index')
+                        ->with('success','Product deleted successfully');
+    }
+
+
+> add this for model products app/Product.php
+
+namespace App;
+  
+use Illuminate\Database\Eloquent\Model;
+   
+class Product extends Model
+{
+    protected $fillable = [
+        'name', 'detail'
+    ];
+}
+
+
+## Step 6: Add Blade Files
+
+1) layout.blade.php
+2) index.blade.php
+3) create.blade.php
+4) edit.blade.php
+5) show.blade.php
 
 ## License
 
